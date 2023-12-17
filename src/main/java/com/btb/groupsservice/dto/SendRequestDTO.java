@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateCanalDTO {
+public class SendRequestDTO {
 
-    private String title;
+    private Long guestUserId;
 
-    private String description;
+    private Long requestSendedUserId;
 
 }

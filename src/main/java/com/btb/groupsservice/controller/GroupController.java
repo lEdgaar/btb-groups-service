@@ -25,30 +25,41 @@ public class GroupController {
 
     @GetMapping("/")
     public @ResponseBody List<Group> getGroups() {
+        log.trace("GET /groups");
+
+        log.info("Event: Get all groups");
         return groupService.getAllGroups();
     }
 
     @PostMapping("/")
     public void addGroup(@RequestBody AddGroupDTO addGroupDTO) {
+        log.trace("POST /groups {}", addGroupDTO.getName());
 
+        log.info("Event: Add group: {}", addGroupDTO.getName());
         groupService.addGroup(addGroupDTO);
     }
 
     @GetMapping("/{groupdId}")
     public @ResponseBody Group getGroup(@PathVariable("groupId") Long groupId) {
+        log.trace("GET /groups/{}", groupId);
 
+        log.info("Event: Get group: {}", groupId);
         return groupService.getGroupById(groupId);
     }
 
     @PutMapping("/{groupdId}")
     public void updateGroup(@PathVariable("groupId") Long groupId, @RequestBody UpdateGroupDTO updateGroupDTO) {
+        log.trace("PUT /groups/{}", groupId);
 
+        log.info("Event: Update group: {}", groupId);
         groupService.updateGroup(groupId, updateGroupDTO);
     }
 
     @DeleteMapping("/{groupdId}")
     public void deleteGroup(@PathVariable("groupId") Long groupId) {
+        log.trace("DELETE /groups/{}", groupId);
 
+        log.info("Event: Delete group: {}", groupId);
         groupService.deleteGroup(groupId);
     }
 

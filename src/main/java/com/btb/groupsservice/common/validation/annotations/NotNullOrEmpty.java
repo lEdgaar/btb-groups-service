@@ -1,6 +1,6 @@
 package com.btb.groupsservice.common.validation.annotations;
 
-import com.btb.usersorganizationservice.common.validation.validators.NotNullOrEmptyValidator;
+import com.btb.groupsservice.common.validation.validators.NotNullOrEmptyValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

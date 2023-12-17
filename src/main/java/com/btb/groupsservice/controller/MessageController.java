@@ -24,19 +24,25 @@ public class MessageController {
 
     @GetMapping("/canal/{canalId}/")
     public @ResponseBody List<GroupCanalMessage> getMessages(@PathVariable("canalId") Long canalId) {
+        log.trace("GET /message/canal/{}", canalId);
 
+        log.info("Event: Get messages for canal: {}", canalId);
         return groupCanalMessageService.getMessages(canalId);
     }
 
     @PostMapping("/canal/{canalId}/")
     public void addMessage(@PathVariable("canalId") Long canalId, @RequestBody AddMessageDTO addMessageDTO) {
+        log.trace("POST /message/canal/{}", canalId);
 
+        log.info("Event: Add message for canal: {} by userId: {}", canalId, addMessageDTO.getUserId());
         groupCanalMessageService.addMessage(canalId, addMessageDTO);
     }
 
     @PutMapping("/{messageId}")
     public void updateMessage(@PathVariable("messageId") Long messageId, @RequestBody UpdateMessageDTO updateMessageDTO) {
+        log.trace("PUT /message/{}", messageId);
 
+        log.info("Event: Update message: {}", messageId);
         groupCanalMessageService.updateMessage(messageId, updateMessageDTO);
     }
 

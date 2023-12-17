@@ -24,31 +24,41 @@ public class CanalController {
 
     @PostMapping("/")
     public void addCanal(@RequestBody AddCanalDTO addCanalDTO) {
+        log.trace("POST /canals {}", addCanalDTO.getName());
 
+        log.info("Event: Add canal: {}", addCanalDTO.getName());
         canalService.addCanal(addCanalDTO);
     }
 
     @GetMapping("/group/{groupdId}")
     public @ResponseBody List<Canal> getCanals(@PathVariable("groupId") Long groupId) {
+        log.trace("GET /canals/group/{}", groupId);
 
+        log.info("Event: Get canals from group: {}", groupId);
         return canalService.getCanals(groupId);
     }
 
     @GetMapping("/{canalId}")
     public Canal getCanal(@PathVariable("canalId") Long canalId) {
+        log.trace("GET /canals/{}", canalId);
 
+        log.info("Event: Get canal: {}", canalId);
         return canalService.getCanal(canalId);
     }
 
     @PutMapping("/{canalId}")
     public void updateCanal(@PathVariable("canalId") Long canalId, @RequestBody UpdateCanalDTO updateCanalDTO) {
+        log.trace("PUT /canals/{}", canalId);
 
+        log.info("Event: Update canal: {}", canalId);
         canalService.updateCanal(canalId, updateCanalDTO);
     }
 
     @DeleteMapping("/{canalId}")
     public void deleteCanal(@PathVariable("canalId") Long canalId) {
+        log.trace("DELETE /canals/{}", canalId);
 
+        log.info("Event: Delete canal: {}", canalId);
         canalService.deleteCanal(canalId);
     }
 

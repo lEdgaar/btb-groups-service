@@ -36,7 +36,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void updateGroup(UpdateGroupDTO updateGroupDTO) {
+    public void updateGroup(Long groupId, UpdateGroupDTO updateGroupDTO) {
         Group group = new Group();
 
         groupMapper.update(group);
