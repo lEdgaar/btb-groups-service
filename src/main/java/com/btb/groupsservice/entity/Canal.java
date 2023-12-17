@@ -2,6 +2,8 @@ package com.btb.groupsservice.entity;
 
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @ToString
@@ -24,6 +26,14 @@ public class Canal extends BaseModel<Long> {
     private Group group;
 
     private Long organizationId;
+
+    private Date createdAt; // NUEVO
+
+    private Date modifiedAt; // NUEVO
+
+    private boolean isDeleted; // NUEVO
+
+    private Date deletedAt; // NUEVO
 
     @Override
     public Long getId() {

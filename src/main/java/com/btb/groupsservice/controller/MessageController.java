@@ -3,6 +3,9 @@ package com.btb.groupsservice.controller;
 import com.btb.groupsservice.dto.AddMessageDTO;
 import com.btb.groupsservice.dto.UpdateMessageDTO;
 import com.btb.groupsservice.entity.GroupCanalMessage;
+import com.btb.groupsservice.exception.CanalException;
+import com.btb.groupsservice.exception.GroupCanalMessageException;
+import com.btb.groupsservice.exception.GroupMembershipException;
 import com.btb.groupsservice.service.GroupCanalMessageService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ public class MessageController {
     }
 
     @GetMapping("/canal/{canalId}/")
-    public @ResponseBody List<GroupCanalMessage> getMessages(@PathVariable("canalId") Long canalId) {
+    public @ResponseBody List<GroupCanalMessage> getMessages(@PathVariable("canalId") Long canalId) throws GroupMembershipException, CanalException {
         log.trace("GET /message/canal/{}", canalId);
 
         log.info("Event: Get messages for canal: {}", canalId);
@@ -31,7 +34,7 @@ public class MessageController {
     }
 
     @PostMapping("/canal/{canalId}/")
-    public void addMessage(@PathVariable("canalId") Long canalId, @RequestBody AddMessageDTO addMessageDTO) {
+    public void addMessage(@PathVariable("canalId") Long canalId, @RequestBody AddMessageDTO addMessageDTO) throws GroupMembershipException, CanalException {
         log.trace("POST /message/canal/{}", canalId);
 
         log.info("Event: Add message for canal: {} by userId: {}", canalId, addMessageDTO.getUserId());
@@ -39,7 +42,7 @@ public class MessageController {
     }
 
     @PutMapping("/{messageId}")
-    public void updateMessage(@PathVariable("messageId") Long messageId, @RequestBody UpdateMessageDTO updateMessageDTO) {
+    public void updateMessage(@PathVariable("messageId") Long messageId, @RequestBody UpdateMessageDTO updateMessageDTO) throws GroupCanalMessageException {
         log.trace("PUT /message/{}", messageId);
 
         log.info("Event: Update message: {}", messageId);

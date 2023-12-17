@@ -4,6 +4,8 @@ package com.btb.groupsservice.controller;
 import com.btb.groupsservice.dto.AddGroupDTO;
 import com.btb.groupsservice.dto.UpdateGroupDTO;
 import com.btb.groupsservice.entity.Group;
+import com.btb.groupsservice.exception.GroupException;
+import com.btb.groupsservice.exception.GroupMembershipException;
 import com.btb.groupsservice.service.GroupService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ public class GroupController {
     }
 
     @PostMapping("/")
-    public void addGroup(@RequestBody AddGroupDTO addGroupDTO) {
+    public void addGroup(@RequestBody AddGroupDTO addGroupDTO) throws GroupException {
         log.trace("POST /groups {}", addGroupDTO.getName());
 
         log.info("Event: Add group: {}", addGroupDTO.getName());
@@ -40,7 +42,7 @@ public class GroupController {
     }
 
     @GetMapping("/{groupdId}")
-    public @ResponseBody Group getGroup(@PathVariable("groupId") Long groupId) {
+    public @ResponseBody Group getGroup(@PathVariable("groupId") Long groupId) throws GroupException {
         log.trace("GET /groups/{}", groupId);
 
         log.info("Event: Get group: {}", groupId);
@@ -48,7 +50,7 @@ public class GroupController {
     }
 
     @PutMapping("/{groupdId}")
-    public void updateGroup(@PathVariable("groupId") Long groupId, @RequestBody UpdateGroupDTO updateGroupDTO) {
+    public void updateGroup(@PathVariable("groupId") Long groupId, @RequestBody UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException {
         log.trace("PUT /groups/{}", groupId);
 
         log.info("Event: Update group: {}", groupId);
@@ -56,11 +58,19 @@ public class GroupController {
     }
 
     @DeleteMapping("/{groupdId}")
-    public void deleteGroup(@PathVariable("groupId") Long groupId) {
+    public void deleteGroup(@PathVariable("groupId") Long groupId) throws GroupException, GroupMembershipException {
         log.trace("DELETE /groups/{}", groupId);
 
         log.info("Event: Delete group: {}", groupId);
         groupService.deleteGroup(groupId);
+    }
+
+    @GetMapping("/{userId}")
+    public @ResponseBody List<Group> getGroupByUserId(@PathVariable("userId") Long userId) throws GroupException {
+        log.trace("GET /groups/{}", userId);
+
+        log.info("Event: Get groups by userId: {}", userId);
+        return groupService.getGroupsByUserId(userId);
     }
 
 }

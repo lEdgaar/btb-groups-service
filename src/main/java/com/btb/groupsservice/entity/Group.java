@@ -2,6 +2,8 @@ package com.btb.groupsservice.entity;
 
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @ToString
@@ -20,6 +22,14 @@ public class Group extends BaseModel<Long> {
     private String description;
 
     private String icon;
+
+    private Date createdAt; // NUEVO
+
+    private Date modifiedAt; // NUEVO
+
+    private boolean isDeleted; // NUEVO
+
+    private Date deletedAt; // NUEVO
 
     @Override
     public Long getId() {
