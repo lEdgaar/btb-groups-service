@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.btb.groupsservice.persistence.mapper.PrivacyLevelMapper">
+
+    <cache/>
+
+    <resultMap id="resultMap" type="com.btb.groupsservice.entity.PrivacyLevel">
+
+        <id property="id" column="ID" javaType="Long" jdbcType="BIGINT" />
+
+        <result property="name" column="NAME" javaType="String" jdbcType="VARCHAR" />
+
+        <result property="description" column="DESCRIPTION" javaType="String" jdbcType="VARCHAR" />
+
+    </resultMap>
+
+    <sql id="selectColumnNamesClause">
+        RES.ID,
+        RES.NAME,
+        RES.DESCRIPTION
+    </sql>
+
+    <sql id="whereFilteredClause">
+        <if test="id != null">
+            AND RES.ID=#{id}
+        </if>
+        <if test="name != null">
+            AND RES.NAME=#{name}
+        </if>
+        <if test="description != null">
+            AND RES.DESCRIPTION=#{description}
+        </if>
+    </sql>
+
+    <sql id="insertColumnNamesClause">
+        NAME,
+        DESCRIPTION
+    </sql>
+
+    <sql id="insertValuesClause">
+        #{name},
+        #{description}
+    </sql>
+
+    <sql id="updateSetClause">
+        NAME=#{name},
+        DESCRIPTION=#{description}
+    </sql>
+
+    <select id="findById" resultMap="resultMap" parameterType="Long" useCache="true" flushCache="false">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        PRIVACY_LEVELS
+        RES
+        where
+        RES.ID=#{value}
+    </select>
+
+    <select id="findAll" resultMap="resultMap">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        PRIVACY_LEVELS
+        RES
+        order by
+        RES.ID asc
+    </select>
+
+    <select id="findByFilter" resultMap="resultMap" parameterType="com.btb.groupsservice.entity.PrivacyLevel">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        PRIVACY_LEVELS
+        RES
+        where 1=1
+        <include refid="whereFilteredClause" />
+        order by
+        RES.ID asc
+    </select>
+
+    <insert id="save" parameterType="com.btb.groupsservice.entity.PrivacyLevel" useGeneratedKeys="true" keyColumn="ID" keyProperty="id" flushCache="true">
+        insert into
+        PRIVACY_LEVELS
+        (
+        <include refid="insertColumnNamesClause" />
+        )
+        values
+        (
+        <include refid="insertValuesClause" />
+        )
+    </insert>
+
+    <update id="update" parameterType="com.btb.groupsservice.entity.PrivacyLevel" flushCache="true">
+        update
+        PRIVACY_LEVELS
+        set
+        <include refid="updateSetClause" />
+        where
+        ID=#{id}
+    </update>
+
+    <delete id="delete" parameterType="Long" flushCache="true">
+        delete from
+            PRIVACY_LEVELS
+        where
+            ID=#{value}
+    </delete>
+
+</mapper>

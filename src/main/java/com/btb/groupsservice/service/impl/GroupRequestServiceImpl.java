@@ -1,7 +1,8 @@
 package com.btb.groupsservice.service.impl;
 
+import com.btb.groupsservice.client.kafka.KafkaConstants;
+import com.btb.groupsservice.client.kafka.Message;
 import com.btb.groupsservice.dto.SendRequestDTO;
-import com.btb.groupsservice.entity.Group;
 import com.btb.groupsservice.entity.GroupRequest;
 import com.btb.groupsservice.exception.*;
 import com.btb.groupsservice.md.GroupMembershipType;
@@ -12,6 +13,7 @@ import com.btb.groupsservice.service.GroupRequestService;
 import com.btb.groupsservice.service.GroupService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -30,6 +32,9 @@ public class GroupRequestServiceImpl implements GroupRequestService {
     @Autowired
     private GroupRequestMapper groupRequestMapper;
 
+    @Autowired
+    private KafkaTemplate<String, Message> kafkaTemplate;
+
     @Override
     public List<GroupRequest> findRequestsByUserId(Long userId) {
         log.trace("Getting requests by userId: {}", userId);
@@ -46,8 +51,6 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         }
         log.trace("User {} have permission to update group: {}", null, groupId);
 
-        // TODO comprobar que los usuarios existan
-
         GroupRequest groupRequest = new GroupRequest();
         groupRequest.setGuestUserId(sendRequestDTO.getGuestUserId());
         groupRequest.setRequestSendedUserId(sendRequestDTO.getRequestSendedUserId());
@@ -57,6 +60,8 @@ public class GroupRequestServiceImpl implements GroupRequestService {
 
         groupRequestMapper.save(groupRequest);
         log.trace("Request saved: {}", groupRequest);
+
+        kafkaTemplate.send(KafkaConstants.NOTIFICATIONS_TOPIC + KafkaConstants.SEPARATOR + KafkaConstants.GROUP_REQUEST, new Message(sendRequestDTO.getGuestUserId().toString(), "BTB - Group Request","You have new request to join group"));
     }
 
     @Override

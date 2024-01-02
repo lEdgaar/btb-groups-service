@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.btb.groupsservice.persistence.mapper.GroupMapper">
+
+    <resultMap id="resultMap" type="com.btb.groupsservice.entity.Group">
+
+        <id property="id" column="ID" javaType="Long" jdbcType="BIGINT" />
+
+        <result property="name" column="NAME" javaType="String" jdbcType="VARCHAR" />
+
+        <result property="title" column="TITLE" javaType="String" jdbcType="VARCHAR" />
+
+        <result property="description" column="DESCRIPTION" javaType="String" jdbcType="VARCHAR" />
+
+        <result property="icon" column="ICON" javaType="String" jdbcType="VARCHAR" />
+
+        <result property="createdAt" column="CREATED_AT" javaType="Date" jdbcType="TIMESTAMP" />
+
+        <result property="modifiedAt" column="MODIFIED_AT" javaType="Date" jdbcType="TIMESTAMP" />
+
+        <result property="isDeleted" column="IS_DELETED" javaType="boolean" jdbcType="BOOLEAN" />
+
+        <result property="deletedAt" column="DELETED_AT" javaType="Date" jdbcType="TIMESTAMP" />
+
+    </resultMap>
+
+    <sql id="selectColumnNamesClause">
+        RES.ID,
+        RES.NAME,
+        RES.TITLE,
+        RES.DESCRIPTION,
+        RES.ICON,
+        RES.CREATED_AT,
+        RES.MODIFIED_AT,
+        RES.IS_DELETED,
+        RES.DELETED_AT
+    </sql>
+
+    <sql id="whereFilteredClause">
+        <if test="id != null">
+            AND RES.ID=#{id}
+        </if>
+        <if test="name != null">
+            AND RES.NAME=#{name}
+        </if>
+        <if test="title != null">
+            AND RES.TITLE=#{title}
+        </if>
+        <if test="description != null">
+            AND RES.DESCRIPTION=#{description}
+        </if>
+        <if test="icon != null">
+            AND RES.ICON=#{icon}
+        </if>
+        <if test="createdAt != null">
+            AND RES.CREATED_AT=#{createdAt}
+        </if>
+        <if test="modifiedAt != null">
+            AND RES.MODIFIED_AT=#{modifiedAt}
+        </if>
+        <if test="isDeleted != null">
+            AND RES.IS_DELETED=#{isDeleted}
+        </if>
+        <if test="deletedAt != null">
+            AND RES.DELETED_AT=#{deletedAt}
+        </if>
+    </sql>
+
+    <sql id="insertColumnNamesClause">
+        NAME,
+        TITLE,
+        DESCRIPTION,
+        ICON,
+        CREATED_AT,
+        MODIFIED_AT,
+        IS_DELETED,
+        DELETED_AT
+    </sql>
+
+    <sql id="insertValuesClause">
+        #{name},
+        #{title},
+        #{description},
+        #{icon},
+        #{createdAt},
+        #{modifiedAt},
+        #{isDeleted},
+        #{deletedAt}
+    </sql>
+
+    <sql id="updateSetClause">
+        NAME=#{name},
+        TITLE=#{title},
+        DESCRIPTION=#{description},
+        ICON=#{icon},
+        CREATED_AT=#{createdAt},
+        MODIFIED_AT=#{modifiedAt},
+        IS_DELETED=#{isDeleted},
+        DELETED_AT=#{deletedAt}
+    </sql>
+
+    <select id="findById" resultMap="resultMap" parameterType="Long">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUPS
+        RES
+        where
+        RES.ID=#{value}
+    </select>
+
+    <select id="findAll" resultMap="resultMap">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUPS
+        RES
+        order by
+        RES.ID asc
+    </select>
+
+    <select id="findByFilter" resultMap="resultMap" parameterType="com.btb.groupsservice.entity.Group">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUPS
+        RES
+        where 1=1
+        <include refid="whereFilteredClause" />
+        order by
+        RES.ID asc
+    </select>
+
+    <select id="findByName" resultMap="resultMap" parameterType="String">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUPS
+        RES
+        where
+        RES.NAME=#{value}
+    </select>
+
+    List<Group> getGroupsByUserId(Long userId);
+
+    <select id="getGroupsByUserId" resultMap="resultMap" parameterType="Long">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUPS
+        RES
+        where
+        RES.ID in (
+            select
+            GROUP_ID
+            from
+            USER_GROUP
+            where
+            USER_ID=#{value}
+        )
+    </select>
+
+    <insert id="save" parameterType="com.btb.groupsservice.entity.Group" useGeneratedKeys="true" keyColumn="ID" keyProperty="id">
+        insert into
+        GROUPS
+        (
+        <include refid="insertColumnNamesClause" />
+        )
+        values
+        (
+        <include refid="insertValuesClause" />
+        )
+    </insert>
+
+    <update id="update" parameterType="com.btb.groupsservice.entity.Group">
+        update
+        GROUPS
+        set
+        <include refid="updateSetClause" />
+        where
+        ID=#{id}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        delete from
+            GROUPS
+        where
+            ID=#{value}
+    </delete>
+
+</mapper>

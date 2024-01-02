@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.btb.groupsservice.persistence.mapper.GroupRequestMapper">
+
+    <resultMap id="resultMap" type="com.btb.groupsservice.entity.GroupRequest">
+
+        <id property="id" column="ID" javaType="Long" jdbcType="BIGINT" />
+
+        <result property="guestUserId" column="GUEST_USER_ID" javaType="Long" jdbcType="BIGINT" />
+
+        <result property="requestSendedUserId" column="REQUEST_SENDED_USER_ID" javaType="Long" jdbcType="BIGINT" />
+
+        <result property="requestStatusMD" column="STATUS" javaType="String" jdbcType="VARCHAR" />
+
+        <result property="sendedAt" column="SENDED_AT" javaType="Date" jdbcType="TIMESTAMP" />
+
+        <association property="group" column="GROUP_ID" javaType="com.btb.groupsservice.entity.Group"
+                     fetchType="lazy" select="com.btb.groupsservice.persistence.mapper.GroupMapper.findById"/>
+
+    </resultMap>
+
+    <sql id="selectColumnNamesClause">
+        RES.ID,
+        RES.GROUP_ID,
+        RES.GUEST_USER_ID,
+        RES.REQUEST_SENDED_USER_ID,
+        RES.STATUS,
+        RES.SENDED_AT
+    </sql>
+
+    <sql id="whereFilteredClause">
+        <if test="id != null">
+            AND RES.ID=#{id}
+        </if>
+        <if test="group != null and group.id != null">
+            AND RES.GROUP_ID=#{group.id}
+        </if>
+        <if test="guestUserId != null">
+            AND RES.GUEST_USER_ID=#{guestUserId}
+        </if>
+        <if test="requestSendedUserId != null">
+            AND RES.REQUEST_SENDED_USER_ID=#{requestSendedUserId}
+        </if>
+        <if test="requestStatusMD != null">
+            AND RES.STATUS=#{requestStatusMD}
+        </if>
+        <if test="sendedAt != null">
+            AND RES.SENDED_AT=#{sendedAt}
+        </if>
+    </sql>
+
+    <sql id="insertColumnNamesClause">
+        GROUP_ID,
+        GUEST_USER_ID,
+        REQUEST_SENDED_USER_ID,
+        STATUS,
+        SENDED_AT
+    </sql>
+
+    <sql id="insertValuesClause">
+        #{group.id},
+        #{guestUserId},
+        #{requestSendedUserId},
+        #{requestStatusMD},
+        #{sendedAt}
+    </sql>
+
+    <sql id="updateSetClause">
+        GROUP_ID=#{group.id},
+        GUEST_USER_ID=#{guestUserId},
+        REQUEST_SENDED_USER_ID=#{requestSendedUserId},
+        STATUS=#{requestStatusMD},
+        SENDED_AT=#{sendedAt}
+    </sql>
+
+    <select id="findById" resultMap="resultMap" parameterType="Long">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUP_REQUESTS
+        RES
+        where
+        RES.ID=#{value}
+    </select>
+
+    <select id="findAll" resultMap="resultMap">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUP_REQUESTS
+        RES
+        order by
+        RES.ID asc
+    </select>
+
+    <select id="findByFilter" resultMap="resultMap" parameterType="com.btb.groupsservice.entity.GroupRequest">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUP_REQUESTS
+        RES
+        where 1=1
+        <include refid="whereFilteredClause" />
+        order by
+        RES.ID asc
+    </select>
+
+    <insert id="save" parameterType="com.btb.groupsservice.entity.GroupRequest" useGeneratedKeys="true" keyColumn="ID" keyProperty="id">
+        insert into
+        GROUP_REQUESTS
+        (
+        <include refid="insertColumnNamesClause" />
+        )
+        values
+        (
+        <include refid="insertValuesClause" />
+        )
+    </insert>
+
+    <update id="update" parameterType="com.btb.groupsservice.entity.GroupRequest">
+        update
+        GROUP_REQUESTS
+        set
+        <include refid="updateSetClause" />
+        where
+        ID=#{id}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        delete from
+            GROUP_REQUESTS
+        where
+            ID=#{value}
+    </delete>
+
+</mapper>

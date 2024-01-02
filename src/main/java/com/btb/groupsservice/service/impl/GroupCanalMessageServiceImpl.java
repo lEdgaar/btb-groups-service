@@ -1,7 +1,9 @@
 package com.btb.groupsservice.service.impl;
 
+import com.btb.groupsservice.client.OperationsServiceClient;
 import com.btb.groupsservice.dto.AddMessageDTO;
 import com.btb.groupsservice.dto.UpdateMessageDTO;
+import com.btb.groupsservice.dto.request.SendEventDTO;
 import com.btb.groupsservice.entity.Canal;
 import com.btb.groupsservice.entity.GroupCanalMessage;
 import com.btb.groupsservice.exception.*;
@@ -27,6 +29,9 @@ public class GroupCanalMessageServiceImpl implements GroupCanalMessageService {
 
     @Autowired
     private GroupCanalMessageMapper groupCanalMessageMapper;
+
+    @Autowired
+    private OperationsServiceClient operationsServiceClient;
 
     @Override
     public List<GroupCanalMessage> getMessages(Long canalId) throws GroupMembershipException, CanalException {
@@ -61,6 +66,12 @@ public class GroupCanalMessageServiceImpl implements GroupCanalMessageService {
 
         groupCanalMessageMapper.save(groupCanalMessage);
         log.trace("Event: Add message for canal: {} by userId: {}", canalId, addMessageDTO.getUserId());
+
+        SendEventDTO sendEventDTO = new SendEventDTO();
+        sendEventDTO.setUserId(1L);
+        sendEventDTO.setDescription("Successfully sended message");
+
+        operationsServiceClient.sendEvent(sendEventDTO);
     }
 
     @Override
@@ -68,9 +79,6 @@ public class GroupCanalMessageServiceImpl implements GroupCanalMessageService {
         log.trace("PUT /message/{}", messageId);
 
         GroupCanalMessage groupCanalMessage = checkMessage(messageId);
-
-        // TODO Comprobar que el usuario que ha escrito sea el mismo que el del token.
-
         groupCanalMessage.setMessage(updateMessageDTO.getMessage());
 
         groupCanalMessageMapper.update(groupCanalMessage);

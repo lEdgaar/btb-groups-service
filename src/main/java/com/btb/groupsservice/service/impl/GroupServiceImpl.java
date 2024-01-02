@@ -1,7 +1,9 @@
 package com.btb.groupsservice.service.impl;
 
+import com.btb.groupsservice.client.OperationsServiceClient;
 import com.btb.groupsservice.dto.AddGroupDTO;
 import com.btb.groupsservice.dto.UpdateGroupDTO;
+import com.btb.groupsservice.dto.request.SendEventDTO;
 import com.btb.groupsservice.entity.Group;
 import com.btb.groupsservice.entity.MembershipType;
 import com.btb.groupsservice.exception.GroupErrorCodes;
@@ -30,6 +32,9 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupMapper groupMapper;
 
+    @Autowired
+    private OperationsServiceClient operationsServiceClient;
+
     @Override
     public List<Group> getAllGroups() {
         return groupMapper.findAll();
@@ -39,7 +44,7 @@ public class GroupServiceImpl implements GroupService {
     public void addGroup(AddGroupDTO addGroupDTO) throws GroupException {
         log.trace("Adding group: {}", addGroupDTO.getName());
 
-        if (groupMapper.existsByName(addGroupDTO.getName())) {
+        if (groupMapper.existsByName(addGroupDTO.getName()) != null) {
             throw new GroupException(GroupErrorCodes.GROUP_NAME_ALREADY_EXISTS, GroupErrorCodes.GROUP_NAME_ALREADY_EXISTS.getKey());
         }
 
@@ -52,6 +57,13 @@ public class GroupServiceImpl implements GroupService {
 
         groupMapper.save(group);
         log.trace("Group added: {}", addGroupDTO.getName());
+
+        SendEventDTO sendEventDTO = new SendEventDTO();
+        sendEventDTO.setUserId(1L);
+        sendEventDTO.setDescription("Successfully grup created");
+
+        operationsServiceClient.sendEvent(sendEventDTO);
+
     }
 
     @Override
@@ -98,7 +110,6 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<Group> getGroupsByUserId(Long userId) {
-        // TODO Comprobar si el usuario existe
         log.trace("Getting groups by userId: {}", userId);
         return groupMapper.getGroupsByUserId(userId);
     }

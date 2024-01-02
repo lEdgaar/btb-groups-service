@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.btb.groupsservice.persistence.mapper.GroupMembershipMapper">
+
+    <resultMap id="resultMap" type="com.btb.groupsservice.entity.GroupMembership">
+
+        <id property="id" column="ID" javaType="Long" jdbcType="BIGINT" />
+
+        <result property="userId" column="USER_ID" javaType="Long" jdbcType="BIGINT" />
+
+        <association property="membershipType" column="MEMBERSHIP_TYPE_ID" javaType="com.btb.groupsservice.entity.MembershipType"
+                     fetchType="lazy" select="com.btb.groupsservice.persistence.mapper.MembershipTypeMapper.findById"/>
+
+        <association property="group" column="GROUP_ID" javaType="com.btb.groupsservice.entity.Group"
+                     fetchType="lazy" select="com.btb.groupsservice.persistence.mapper.GroupMapper.findById"/>
+
+    </resultMap>
+
+    <sql id="selectColumnNamesClause">
+        RES.ID,
+        RES.GROUP_ID,
+        RES.USER_ID,
+        RES.MEMBERSHIP_TYPE_ID
+    </sql>
+
+    <sql id="whereFilteredClause">
+        <if test="id != null">
+            AND RES.ID=#{id}
+        </if>
+        <if test="group != null and group.id != null">
+            AND RES.GROUP_ID=#{group.id}
+        </if>
+        <if test="userId != null">
+            AND RES.USER_ID=#{userId}
+        </if>
+        <if test="membershipType != null and membershipType.id != null">
+            AND RES.MEMBERSHIP_TYPE_ID=#{membershipType.id}
+        </if>
+    </sql>
+
+    <sql id="insertColumnNamesClause">
+        GROUP_ID,
+        USER_ID,
+        MEMBERSHIP_TYPE_ID
+    </sql>
+
+    <sql id="insertValuesClause">
+        #{group.id},
+        #{userId},
+        #{membershipType.id}
+    </sql>
+
+    <sql id="updateSetClause">
+        GROUP_ID=#{group.id},
+        USER_ID=#{userId},
+        MEMBERSHIP_TYPE_ID=#{membershipType.id}
+    </sql>
+
+    <select id="findById" resultMap="resultMap" parameterType="Long">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUP_MEMBERSHIP
+        RES
+        where
+        RES.ID=#{value}
+    </select>
+
+    <select id="findAll" resultMap="resultMap">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUP_MEMBERSHIP
+        RES
+        order by
+        RES.ID asc
+    </select>
+
+    <select id="findByFilter" resultMap="resultMap" parameterType="com.btb.groupsservice.entity.GroupMembership">
+        select
+        <include refid="selectColumnNamesClause" />
+        from
+        GROUP_MEMBERSHIP
+        RES
+        where 1=1
+        <include refid="whereFilteredClause" />
+        order by
+        RES.ID asc
+    </select>
+
+    <insert id="save" parameterType="com.btb.groupsservice.entity.GroupMembership" useGeneratedKeys="true" keyColumn="ID" keyProperty="id">
+        insert into
+        GROUP_MEMBERSHIP
+        (
+        <include refid="insertColumnNamesClause" />
+        )
+        values
+        (
+        <include refid="insertValuesClause" />
+        )
+    </insert>
+
+    <update id="update" parameterType="com.btb.groupsservice.entity.GroupMembership">
+        update
+        GROUP_MEMBERSHIP
+        set
+        <include refid="updateSetClause" />
+        where
+        ID=#{id}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        delete from
+            GROUP_MEMBERSHIP
+        where
+            ID=#{value}
+    </delete>
+
+</mapper>

@@ -1,7 +1,9 @@
 package com.btb.groupsservice.service.impl;
 
+import com.btb.groupsservice.client.OperationsServiceClient;
 import com.btb.groupsservice.dto.AddCanalDTO;
 import com.btb.groupsservice.dto.UpdateCanalDTO;
+import com.btb.groupsservice.dto.request.SendEventDTO;
 import com.btb.groupsservice.entity.Canal;
 import com.btb.groupsservice.entity.Group;
 import com.btb.groupsservice.exception.*;
@@ -30,6 +32,9 @@ public class CanalServiceImpl implements CanalService {
     @Autowired
     private CanalMapper canalMapper;
 
+    @Autowired
+    private OperationsServiceClient operationsServiceClient;
+
     @Override
     public void addCanal(AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException {
         log.trace("Add canal: {} to group: {}", addCanalDTO.getName(), addCanalDTO.getGroupId());
@@ -43,12 +48,16 @@ public class CanalServiceImpl implements CanalService {
         Canal canal = new Canal();
         canal.setName(addCanalDTO.getName());
         canal.setGroup(group);
-
-        // TODO comprobar si el usuario existe
         canal.setUserCreatedId(addCanalDTO.getUserCreatedId());
         canal.setDescription(addCanalDTO.getDescription());
         canal.setOrganizationId(addCanalDTO.getOrganizationId());
         canal.setCreatedAt(new Date());
+
+        SendEventDTO sendEventDTO = new SendEventDTO();
+        sendEventDTO.setUserId(1L);
+        sendEventDTO.setDescription("Successfully created canal");
+
+        operationsServiceClient.sendEvent(sendEventDTO);
 
         canalMapper.save(canal);
         log.trace("Canal added: {} to group: {}", canal.getId(), addCanalDTO.getGroupId());
