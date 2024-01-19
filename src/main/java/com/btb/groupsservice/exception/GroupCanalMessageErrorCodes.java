@@ -5,10 +5,10 @@ public enum GroupCanalMessageErrorCodes implements ErrorCode {
     MESSAGE_ID_NOT_NULL(1, "message.id.not.null"),
     MESSAGE_NOT_FOUND(2, "message.not.found");
 
-    private final String code;
+    private final int code;
     private final String message;
 
-     GroupCanalMessageErrorCodes(String code, String message) {
+     GroupCanalMessageErrorCodes(int code, String message) {
         this.code = code;
         this.message = message;
     }

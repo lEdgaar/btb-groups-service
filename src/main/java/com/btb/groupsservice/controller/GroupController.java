@@ -2,6 +2,7 @@ package com.btb.groupsservice.controller;
 
 
 import com.btb.groupsservice.dto.AddGroupDTO;
+import com.btb.groupsservice.dto.InfoGroupDTO;
 import com.btb.groupsservice.dto.UpdateGroupDTO;
 import com.btb.groupsservice.entity.Group;
 import com.btb.groupsservice.exception.GroupException;
@@ -34,38 +35,38 @@ public class GroupController {
     }
 
     @PostMapping("/")
-    public void addGroup(@RequestBody AddGroupDTO addGroupDTO) throws GroupException {
+    public void addGroup(@RequestHeader("Authorization") String authorizationHeader, @RequestBody AddGroupDTO addGroupDTO) throws GroupException {
         log.trace("POST /groups {}", addGroupDTO.getName());
 
         log.info("Event: Add group: {}", addGroupDTO.getName());
-        groupService.addGroup(addGroupDTO);
+        groupService.addGroup(addGroupDTO, authorizationHeader);
     }
 
-    @GetMapping("/{groupdId}")
-    public @ResponseBody Group getGroup(@PathVariable("groupId") Long groupId) throws GroupException {
+    @GetMapping("/{groupId}")
+    public @ResponseBody InfoGroupDTO getGroup(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("groupId") Long groupId) throws GroupException {
         log.trace("GET /groups/{}", groupId);
 
         log.info("Event: Get group: {}", groupId);
-        return groupService.getGroupById(groupId);
+        return groupService.getGroupById(authorizationHeader, groupId);
     }
 
     @PutMapping("/{groupdId}")
-    public void updateGroup(@PathVariable("groupId") Long groupId, @RequestBody UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException {
+    public void updateGroup(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("groupId") Long groupId, @RequestBody UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException {
         log.trace("PUT /groups/{}", groupId);
 
         log.info("Event: Update group: {}", groupId);
-        groupService.updateGroup(groupId, updateGroupDTO);
+        groupService.updateGroup(authorizationHeader, groupId, updateGroupDTO);
     }
 
     @DeleteMapping("/{groupdId}")
-    public void deleteGroup(@PathVariable("groupId") Long groupId) throws GroupException, GroupMembershipException {
+    public void deleteGroup(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("groupId") Long groupId) throws GroupException, GroupMembershipException {
         log.trace("DELETE /groups/{}", groupId);
 
         log.info("Event: Delete group: {}", groupId);
-        groupService.deleteGroup(groupId);
+        groupService.deleteGroup(authorizationHeader, groupId);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     public @ResponseBody List<Group> getGroupByUserId(@PathVariable("userId") Long userId) throws GroupException {
         log.trace("GET /groups/{}", userId);
 

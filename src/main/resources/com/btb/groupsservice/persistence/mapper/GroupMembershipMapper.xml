@@ -19,7 +19,6 @@
     </resultMap>
 
     <sql id="selectColumnNamesClause">
-        RES.ID,
         RES.GROUP_ID,
         RES.USER_ID,
         RES.MEMBERSHIP_TYPE_ID

@@ -2,6 +2,7 @@ package com.btb.groupsservice.service.impl;
 
 import com.btb.groupsservice.client.OperationsServiceClient;
 import com.btb.groupsservice.dto.AddCanalDTO;
+import com.btb.groupsservice.dto.InfoGroupDTO;
 import com.btb.groupsservice.dto.UpdateCanalDTO;
 import com.btb.groupsservice.dto.request.SendEventDTO;
 import com.btb.groupsservice.entity.Canal;
@@ -36,18 +37,19 @@ public class CanalServiceImpl implements CanalService {
     private OperationsServiceClient operationsServiceClient;
 
     @Override
-    public void addCanal(AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException {
+    public void addCanal(String authorizationHeader, AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException {
         log.trace("Add canal: {} to group: {}", addCanalDTO.getName(), addCanalDTO.getGroupId());
-        Group group = groupService.getGroupById(addCanalDTO.getGroupId());
+        InfoGroupDTO infoGroupDTO = groupService.getGroupById(authorizationHeader, addCanalDTO.getGroupId());
 
-        if (!groupMembershipService.checkMembership(addCanalDTO.getGroupId(), null, GroupMembershipType.MEMBER.name())) {
+
+        if (!infoGroupDTO.isAdmin()) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION, GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION.getKey());
         }
         log.trace("User {} have permission to update group: {}", null, addCanalDTO.getGroupId());
 
         Canal canal = new Canal();
         canal.setName(addCanalDTO.getName());
-        canal.setGroup(group);
+        canal.setGroup(infoGroupDTO.getGroup());
         canal.setUserCreatedId(addCanalDTO.getUserCreatedId());
         canal.setDescription(addCanalDTO.getDescription());
         canal.setOrganizationId(addCanalDTO.getOrganizationId());
@@ -64,11 +66,11 @@ public class CanalServiceImpl implements CanalService {
     }
 
     @Override
-    public List<Canal> getCanals(Long groupId) throws GroupException, GroupMembershipException {
-        groupService.getGroupById(groupId);
+    public List<Canal> getCanals(String authorizationHeader, Long groupId) throws GroupException, GroupMembershipException {
+        InfoGroupDTO infoGroupDTO = groupService.getGroupById(authorizationHeader, groupId);
         log.trace("Get canals from group: {}", groupId);
 
-        if (!groupMembershipService.isMember(groupId, null)) {
+        if (!infoGroupDTO.isAdmin()) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_MEMBER_OF_GROUP, GroupMembershipErrorCodes.USER_NOT_MEMBER_OF_GROUP.getKey());
         }
         log.trace("User {} is member of group: {}", null, groupId);
@@ -96,7 +98,7 @@ public class CanalServiceImpl implements CanalService {
 
         Canal canal = checkCanal(canalId);
 
-        if (!groupMembershipService.checkMembership(canal.getGroup().getId(), null, GroupMembershipType.MEMBER.name())) {
+        if (!groupMembershipService.checkMembership(canal.getGroup(), null, GroupMembershipType.MEMBER.name())) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION, GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION.getKey());
         }
         log.trace("User {} have permission to update group: {}", null, canal.getGroup().getId());
@@ -115,7 +117,7 @@ public class CanalServiceImpl implements CanalService {
 
         Canal canal = checkCanal(canalId);
 
-        if (!groupMembershipService.checkMembership(canal.getGroup().getId(), null, GroupMembershipType.MEMBER.name())) {
+        if (!groupMembershipService.checkMembership(canal.getGroup(), null, GroupMembershipType.MEMBER.name())) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION, GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION.getKey());
         }
         log.trace("User {} have permission to update group: {}", null, canal.getGroup().getId());

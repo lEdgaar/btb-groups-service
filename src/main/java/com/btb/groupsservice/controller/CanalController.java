@@ -26,19 +26,19 @@ public class CanalController {
     }
 
     @PostMapping("/")
-    public void addCanal(@RequestBody AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException {
+    public void addCanal(@RequestHeader("Authorization") String authorizationHeader, @RequestBody AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException {
         log.trace("POST /canals {}", addCanalDTO.getName());
 
         log.info("Event: Add canal: {}", addCanalDTO.getName());
-        canalService.addCanal(addCanalDTO);
+        canalService.addCanal(authorizationHeader, addCanalDTO);
     }
 
     @GetMapping("/group/{groupdId}")
-    public @ResponseBody List<Canal> getCanals(@PathVariable("groupId") Long groupId) throws GroupException, GroupMembershipException {
+    public @ResponseBody List<Canal> getCanals(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("groupId") Long groupId) throws GroupException, GroupMembershipException {
         log.trace("GET /canals/group/{}", groupId);
 
         log.info("Event: Get canals from group: {}", groupId);
-        return canalService.getCanals(groupId);
+        return canalService.getCanals(authorizationHeader, groupId);
     }
 
     @GetMapping("/{canalId}")

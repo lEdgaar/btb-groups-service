@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface CanalService {
 
-    void addCanal(AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException;
+    void addCanal(String authorizationHeader, AddCanalDTO addCanalDTO) throws GroupException, GroupMembershipException;
 
-    List<Canal> getCanals(Long groupId) throws GroupException, GroupMembershipException;
+    List<Canal> getCanals(String authorizationHeader, Long groupId) throws GroupException, GroupMembershipException;
 
     Canal getCanal(Long canalId) throws CanalException, GroupMembershipException;
 

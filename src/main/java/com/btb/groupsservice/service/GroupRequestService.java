@@ -12,7 +12,7 @@ public interface GroupRequestService {
 
     List<GroupRequest> findRequestsByUserId(Long userId);
 
-    void sendRequest(Long groupId, SendRequestDTO sendRequestDTO) throws GroupException, GroupMembershipException;
+    void sendRequest(String authorizationHeader, Long groupId, SendRequestDTO sendRequestDTO) throws GroupException, GroupMembershipException;
 
     void acceptRequest(Long requestId) throws GroupRequestException;
 

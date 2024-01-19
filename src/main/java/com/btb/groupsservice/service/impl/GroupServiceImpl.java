@@ -1,10 +1,14 @@
 package com.btb.groupsservice.service.impl;
 
 import com.btb.groupsservice.client.OperationsServiceClient;
+import com.btb.groupsservice.client.UserOrganizationServiceClient;
 import com.btb.groupsservice.dto.AddGroupDTO;
+import com.btb.groupsservice.dto.InfoGroupDTO;
 import com.btb.groupsservice.dto.UpdateGroupDTO;
 import com.btb.groupsservice.dto.request.SendEventDTO;
+import com.btb.groupsservice.dto.response.UserDTO;
 import com.btb.groupsservice.entity.Group;
+import com.btb.groupsservice.entity.GroupMembership;
 import com.btb.groupsservice.entity.MembershipType;
 import com.btb.groupsservice.exception.GroupErrorCodes;
 import com.btb.groupsservice.exception.GroupException;
@@ -12,6 +16,7 @@ import com.btb.groupsservice.exception.GroupMembershipErrorCodes;
 import com.btb.groupsservice.exception.GroupMembershipException;
 import com.btb.groupsservice.md.GroupMembershipType;
 import com.btb.groupsservice.persistence.mapper.GroupMapper;
+import com.btb.groupsservice.persistence.mapper.MembershipTypeMapper;
 import com.btb.groupsservice.service.GroupMembershipService;
 import com.btb.groupsservice.service.GroupService;
 import lombok.extern.log4j.Log4j2;
@@ -35,16 +40,26 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private OperationsServiceClient operationsServiceClient;
 
+    @Autowired
+    private UserOrganizationServiceClient userOrganizationServiceClient;
+
+    @Autowired
+    private MembershipTypeMapper membershipTypeMapper;
+
+
     @Override
     public List<Group> getAllGroups() {
         return groupMapper.findAll();
     }
 
     @Override
-    public void addGroup(AddGroupDTO addGroupDTO) throws GroupException {
+    public void addGroup(AddGroupDTO addGroupDTO, String authorizationHeader) throws GroupException {
         log.trace("Adding group: {}", addGroupDTO.getName());
 
-        if (groupMapper.existsByName(addGroupDTO.getName()) != null) {
+        Group filter = new Group();
+        filter.setName(addGroupDTO.getName());
+
+        if (groupMapper.findByFilter(filter).size() > 0) {
             throw new GroupException(GroupErrorCodes.GROUP_NAME_ALREADY_EXISTS, GroupErrorCodes.GROUP_NAME_ALREADY_EXISTS.getKey());
         }
 
@@ -58,29 +73,51 @@ public class GroupServiceImpl implements GroupService {
         groupMapper.save(group);
         log.trace("Group added: {}", addGroupDTO.getName());
 
+        UserDTO userDTO = userOrganizationServiceClient.getBrokers(authorizationHeader);
+
+        groupMembershipService.addGroupMembership(group, userDTO.getUserId(), membershipTypeMapper.findById(GroupMembershipType.ADMIN.getId()));
+
         SendEventDTO sendEventDTO = new SendEventDTO();
-        sendEventDTO.setUserId(1L);
+        sendEventDTO.setUserId(userDTO.getUserId());
         sendEventDTO.setDescription("Successfully grup created");
 
         operationsServiceClient.sendEvent(sendEventDTO);
 
+        GroupMembership groupMembership = new GroupMembership();
+        groupMembership.setGroup(group);
+        groupMembership.setUserId(userDTO.getUserId());
+        groupMembership.setMembershipType(membershipTypeMapper.findById(GroupMembershipType.ADMIN.getId()));
+
+        groupMembershipService.addGroupMembership(group, userDTO.getUserId(), membershipTypeMapper.findById(GroupMembershipType.ADMIN.getId()));
+
     }
 
     @Override
-    public Group getGroupById(Long groupId) throws GroupException {
-        return checkGroup(groupId);
+    public InfoGroupDTO getGroupById(String authorizationHeader, Long groupId) throws GroupException {
+        UserDTO userDTO = userOrganizationServiceClient.getBrokers(authorizationHeader);
+        Group group = checkGroup(groupId);
+        InfoGroupDTO infoGroupDTO = new InfoGroupDTO();
+        infoGroupDTO.setGroup(group);
+        infoGroupDTO.setAdmin(false);
+
+        if (groupMembershipService.checkMembership(infoGroupDTO.getGroup(), userDTO.getUserId(), GroupMembershipType.ADMIN.getInternalCode())) {
+            infoGroupDTO.setAdmin(true);
+        }
+
+        return infoGroupDTO;
     }
 
     @Override
-    public void updateGroup(Long groupId, UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException {
+    public void updateGroup(String authorizationHeader, Long groupId, UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException {
         log.trace("Updating group: {}", groupId);
 
-        if (!groupMembershipService.checkMembership(groupId, null, GroupMembershipType.MEMBER.name())) {
+        UserDTO userDTO = userOrganizationServiceClient.getBrokers(authorizationHeader);
+        Group group = checkGroup(groupId);
+
+        if (!groupMembershipService.checkMembership(group, userDTO.getUserId(), GroupMembershipType.ADMIN.getInternalCode())) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION, GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION.getKey());
         }
-        log.trace("User {} have permission to update group: {}", null, groupId);
-
-        Group group = checkGroup(groupId);
+        log.trace("User {} have permission to update group: {}", userDTO.getUserId(), groupId);
 
         group.setTitle(updateGroupDTO.getTitle());
         group.setDescription(updateGroupDTO.getDescription());
@@ -92,17 +129,19 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void deleteGroup(Long groupId) throws GroupException, GroupMembershipException {
+    public void deleteGroup(String authorizationHeader, Long groupId) throws GroupException, GroupMembershipException {
         log.trace("Deleting group: {}", groupId);
 
-        if (!groupMembershipService.checkMembership(groupId, null, GroupMembershipType.MEMBER.name())) {
+        UserDTO userDTO = getBrokerInfo(authorizationHeader);
+        Group group = checkGroup(groupId);
+
+        if (!groupMembershipService.checkMembership(group, userDTO.getUserId(), GroupMembershipType.ADMIN.getInternalCode())) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION, GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION.getKey());
         }
-        log.trace("User {} have permission to update group: {}", null, groupId);
+        log.trace("User {} have permission to update group: {}", userDTO.getUserId(), groupId);
 
-        Group group = checkGroup(groupId);
         group.setDeleted(true);
-        group.setCreatedAt(new Date());
+        group.setDeletedAt(new Date());
 
         groupMapper.update(group);
         log.trace("Group deleted: {}", groupId);
@@ -128,5 +167,9 @@ public class GroupServiceImpl implements GroupService {
 
         log.trace("Group found: {}", groupId);
         return group;
+    }
+
+    private UserDTO getBrokerInfo (String authorizationHeader) {
+        return userOrganizationServiceClient.getBrokers(authorizationHeader);
     }
 }

@@ -1,6 +1,7 @@
 package com.btb.groupsservice.service;
 
 import com.btb.groupsservice.dto.AddGroupDTO;
+import com.btb.groupsservice.dto.InfoGroupDTO;
 import com.btb.groupsservice.dto.UpdateGroupDTO;
 import com.btb.groupsservice.entity.Group;
 import com.btb.groupsservice.exception.GroupException;
@@ -12,13 +13,13 @@ public interface GroupService {
 
     List<Group> getAllGroups();
 
-    void addGroup(AddGroupDTO addGroupDTO) throws GroupException;
+    void addGroup(AddGroupDTO addGroupDTO, String authorizationHeader) throws GroupException;
 
-    Group getGroupById(Long groupId) throws GroupException;
+    InfoGroupDTO getGroupById(String authorizationHeader, Long groupId) throws GroupException;
 
-    void updateGroup(Long groupId, UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException;
+    void updateGroup(String authorizationHeader, Long groupId, UpdateGroupDTO updateGroupDTO) throws GroupException, GroupMembershipException;
 
-    void deleteGroup(Long groupId) throws GroupException, GroupMembershipException;
+    void deleteGroup(String authorizationHeader, Long groupId) throws GroupException, GroupMembershipException;
 
     List<Group> getGroupsByUserId(Long userId);
 

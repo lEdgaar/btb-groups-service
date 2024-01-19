@@ -1,7 +1,6 @@
 package com.btb.groupsservice.service.impl;
 
-import com.btb.groupsservice.client.kafka.KafkaConstants;
-import com.btb.groupsservice.client.kafka.Message;
+import com.btb.groupsservice.dto.InfoGroupDTO;
 import com.btb.groupsservice.dto.SendRequestDTO;
 import com.btb.groupsservice.entity.GroupRequest;
 import com.btb.groupsservice.exception.*;
@@ -13,7 +12,6 @@ import com.btb.groupsservice.service.GroupRequestService;
 import com.btb.groupsservice.service.GroupService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -32,8 +30,6 @@ public class GroupRequestServiceImpl implements GroupRequestService {
     @Autowired
     private GroupRequestMapper groupRequestMapper;
 
-    @Autowired
-    private KafkaTemplate<String, Message> kafkaTemplate;
 
     @Override
     public List<GroupRequest> findRequestsByUserId(Long userId) {
@@ -43,10 +39,12 @@ public class GroupRequestServiceImpl implements GroupRequestService {
     }
 
     @Override
-    public void sendRequest(Long groupId, SendRequestDTO sendRequestDTO) throws GroupException, GroupMembershipException {
+    public void sendRequest(String authorizationHeader, Long groupId, SendRequestDTO sendRequestDTO) throws GroupException, GroupMembershipException {
         log.trace("Sending request from user: {} to group: {} by userAdminIdGroup: {}", sendRequestDTO.getGuestUserId(), groupId, sendRequestDTO.getRequestSendedUserId());
 
-        if (!groupMembershipService.checkMembership(groupId, null, GroupMembershipType.MEMBER.name())) {
+        InfoGroupDTO infoGroupDTO = groupService.getGroupById(authorizationHeader, groupId);
+
+        if (!infoGroupDTO.isAdmin()) {
             throw new GroupMembershipException(GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION, GroupMembershipErrorCodes.USER_NOT_HAVE_PERMISSION.getKey());
         }
         log.trace("User {} have permission to update group: {}", null, groupId);
@@ -55,13 +53,11 @@ public class GroupRequestServiceImpl implements GroupRequestService {
         groupRequest.setGuestUserId(sendRequestDTO.getGuestUserId());
         groupRequest.setRequestSendedUserId(sendRequestDTO.getRequestSendedUserId());
         groupRequest.setRequestStatusMD(RequestStatusMD.PENDING.name());
-        groupRequest.setGroup(groupService.getGroupById(groupId));
+        groupRequest.setGroup(infoGroupDTO.getGroup());
         groupRequest.setSendedAt(new Date());
 
         groupRequestMapper.save(groupRequest);
         log.trace("Request saved: {}", groupRequest);
-
-        kafkaTemplate.send(KafkaConstants.NOTIFICATIONS_TOPIC + KafkaConstants.SEPARATOR + KafkaConstants.GROUP_REQUEST, new Message(sendRequestDTO.getGuestUserId().toString(), "BTB - Group Request","You have new request to join group"));
     }
 
     @Override

@@ -105,7 +105,7 @@
         select
         <include refid="selectColumnNamesClause" />
         from
-        GROUPS
+        `GROUPS`
         RES
         where
         RES.ID=#{value}
@@ -115,7 +115,7 @@
         select
         <include refid="selectColumnNamesClause" />
         from
-        GROUPS
+        `GROUPS`
         RES
         order by
         RES.ID asc
@@ -125,7 +125,7 @@
         select
         <include refid="selectColumnNamesClause" />
         from
-        GROUPS
+        `GROUPS`
         RES
         where 1=1
         <include refid="whereFilteredClause" />
@@ -137,19 +137,17 @@
         select
         <include refid="selectColumnNamesClause" />
         from
-        GROUPS
+        `GROUPS`
         RES
         where
         RES.NAME=#{value}
     </select>
 
-    List<Group> getGroupsByUserId(Long userId);
-
     <select id="getGroupsByUserId" resultMap="resultMap" parameterType="Long">
         select
         <include refid="selectColumnNamesClause" />
         from
-        GROUPS
+        `GROUPS`
         RES
         where
         RES.ID in (
@@ -164,7 +162,7 @@
 
     <insert id="save" parameterType="com.btb.groupsservice.entity.Group" useGeneratedKeys="true" keyColumn="ID" keyProperty="id">
         insert into
-        GROUPS
+        `GROUPS`
         (
         <include refid="insertColumnNamesClause" />
         )
@@ -176,7 +174,7 @@
 
     <update id="update" parameterType="com.btb.groupsservice.entity.Group">
         update
-        GROUPS
+        `GROUPS`
         set
         <include refid="updateSetClause" />
         where
@@ -185,7 +183,7 @@
 
     <delete id="delete" parameterType="Long">
         delete from
-            GROUPS
+            `GROUPS`
         where
             ID=#{value}
     </delete>

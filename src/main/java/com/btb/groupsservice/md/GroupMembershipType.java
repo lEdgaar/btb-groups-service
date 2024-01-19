@@ -17,4 +17,11 @@ public enum GroupMembershipType {
         this.internalCode = internalCode;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getInternalCode() {
+        return internalCode;
+    }
 }

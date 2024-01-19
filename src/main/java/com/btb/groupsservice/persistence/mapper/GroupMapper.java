@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface GroupMapper extends CommonMapper<Group, Long> {
 
-    List<Group> existsByName(String name);
-
     List<Group> getGroupsByUserId(Long userId);
 
 }

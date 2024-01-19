@@ -3,6 +3,7 @@ package com.btb.groupsservice.controller;
 import com.btb.groupsservice.dto.SendRequestDTO;
 import com.btb.groupsservice.entity.GroupRequest;
 import com.btb.groupsservice.exception.GroupException;
+import com.btb.groupsservice.exception.GroupMembershipException;
 import com.btb.groupsservice.exception.GroupRequestException;
 import com.btb.groupsservice.service.GroupRequestService;
 import lombok.extern.log4j.Log4j2;
@@ -32,11 +33,11 @@ public class GroupRequestController {
     }
 
     @PostMapping("/group/{groupId}")
-    public void sendRequest(@PathVariable("groupId") Long groupId, @RequestBody SendRequestDTO sendRequestDTO) throws GroupException {
+    public void sendRequest(@RequestHeader("Authorization") String authorizationHeader, @PathVariable("groupId") Long groupId, @RequestBody SendRequestDTO sendRequestDTO) throws GroupException, GroupMembershipException {
         log.trace("POST /group/{}", groupId);
 
         log.info("Event: Send request from user: {} to group: {} and userId {}", sendRequestDTO.getRequestSendedUserId(), groupId, sendRequestDTO.getGuestUserId());
-        groupRequestService.sendRequest(groupId, sendRequestDTO);
+        groupRequestService.sendRequest(authorizationHeader, groupId, sendRequestDTO);
     }
 
     @PutMapping("/{requestId}/accept")
